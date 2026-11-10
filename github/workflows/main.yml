@@ -1,0 +1,43 @@
+name: Nazir-Bahrami-TV Android APK
+
+on:
+workflow_dispatch:
+push:
+branches:
+- main
+
+jobs:
+build:
+runs-on: ubuntu-latest
+
+steps:
+  - name: Checkout
+    uses: actions/checkout@v4
+
+  - name: Setup Java
+    uses: actions/setup-java@v4
+    with:
+      distribution: temurin
+      java-version: '17'
+
+  - name: Extract ZIP
+    run: |
+      mkdir -p android-src
+      ZIP=$(find . -name "Nazir_Bahrami_TV_Phone_APK_Build.zip" -print -quit)
+      test -n "$ZIP" || { echo "ZIP not found"; exit 1; }
+      unzip -q "$ZIP" -d android-src
+
+  - name: Build APK
+    run: |
+      GRADLEW=$(find android-src -type f -name gradlew -print -quit)
+      test -n "$GRADLEW" || { echo "gradlew not found"; exit 1; }
+      cd "$(dirname "$GRADLEW")"
+      chmod +x gradlew
+      ./gradlew assembleDebug --stacktrace
+
+  - name: Upload APK
+    uses: actions/upload-artifact@v4
+    with:
+      name: Nazir-Bahrami-TV-APK
+      path: android-src/**/build/outputs/apk/debug/*.apk
+      if-no-files-found: error
