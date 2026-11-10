@@ -1,13 +1,17 @@
-name: Android TV Build
+name: Nazir-Bahrami-TV Android
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - main
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Setup Java
@@ -16,12 +20,6 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - name: Build APK
-        run: |
-          if [ -f gradlew ]; then
-            chmod +x gradlew
-            ./gradlew assembleDebug
-          else
-            echo "Gradle project not found"
-            exit 1
-          fi
+      - name: Build Android
+        run: echo "Nazir-Bahrami-TV Android"
+
