@@ -1,52 +1,55 @@
 name: Nazir-Bahrami-TV Android APK
 
-"on":
-  workflow_dispatch:
-  push:
-    branches:
-      - main
+on:
+workflow_dispatch:
+push:
+branches:
+- main
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
+build:
+runs-on: ubuntu-latest
 
-    steps:
-      - name: Checkout Project
-        uses: actions/checkout@v4
+steps:
+  - name: Checkout Project
+    uses: actions/checkout@v4
 
-      - name: Extract Android Project
-        run: |
-          mkdir -p android-src
-          ZIP=$(find . -name "Nazir_Bahrami_TV_Phone_APK_Build.zip" -print -quit)
-          if [ -z "$ZIP" ]; then
-            echo "ZIP file not found"
-            exit 1
-          fi
-          unzip -q "$ZIP" -d android-src
+  - name: Setup Java
+    uses: actions/setup-java@v4
+    with:
+      distribution: temurin
+      java-version: '17'
 
-      - name: Setup Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: '17'
+  - name: Extract Android Project
+    run: |
+      mkdir -p android-src
+      ZIP=$(find . -type f -name "*.zip" -print -quit)
+      if [ -z "$ZIP" ]; then
+        echo "ERROR: ZIP file not found"
+        exit 1
+      fi
+      unzip -q "$ZIP" -d android-src
+      echo "ZIP extracted successfully"
+      find android-src -maxdepth 4 -type f | head -100
 
-      - name: Build Android APK
-        run: |
-          GRADLEW=$(find android-src -type f -name gradlew -print -quit)
-          if [ -z "$GRADLEW" ]; then
-            echo "gradlew file not found"
-            exit 1
-          fi
-          cd "$(dirname "$GRADLEW")"
-          chmod +x gradlew
-          ./gradlew assembleDebug
+  - name: Build Android APK
+    run: |
+      GRADLEW=$(find android-src -type f -name gradlew -print -quit)
+      if [ -z "$GRADLEW" ]; then
+        echo "ERROR: gradlew file not found"
+        exit 1
+      fi
+      cd "$(dirname "$GRADLEW")"
+      chmod +x gradlew
+      ./gradlew assembleDebug --stacktrace
 
-      - name: Upload APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: Nazir-Bahrami-TV-APK
-          path: android-src/**/build/outputs/apk/debug/*.apk
-          if-no-files-found: error
+  - name: Upload APK
+    uses: actions/upload-artifact@v4
+    with:
+      name: Nazir-Bahrami-TV-APK
+      path: android-src/**/build/outputs/apk/debug/*.apk
+      if-no-files-found: error
+
 
 
 
