@@ -1,6 +1,6 @@
 name: Nazir-Bahrami-TV Android APK
 
-on:
+"on":
   workflow_dispatch:
   push:
     branches:
@@ -18,9 +18,11 @@ jobs:
         run: |
           mkdir -p android-src
           ZIP=$(find . -name "Nazir_Bahrami_TV_Phone_APK_Build.zip" -print -quit)
-          if [ -n "$ZIP" ]; then
-            unzip -q "$ZIP" -d android-src
+          if [ -z "$ZIP" ]; then
+            echo "ZIP file not found"
+            exit 1
           fi
+          unzip -q "$ZIP" -d android-src
 
       - name: Setup Java
         uses: actions/setup-java@v4
@@ -30,9 +32,9 @@ jobs:
 
       - name: Build Android APK
         run: |
-          GRADLEW=$(find . -type f -name gradlew -not -path './.git/*' -print -quit)
+          GRADLEW=$(find android-src -type f -name gradlew -print -quit)
           if [ -z "$GRADLEW" ]; then
-            echo "ERROR: gradlew file not found"
+            echo "gradlew file not found"
             exit 1
           fi
           cd "$(dirname "$GRADLEW")"
@@ -43,8 +45,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: Nazir-Bahrami-TV-APK
-          path: "**/build/outputs/apk/debug/*.apk"
+          path: android-src/**/build/outputs/apk/debug/*.apk
           if-no-files-found: error
+
 
 
 
